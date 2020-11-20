@@ -48,79 +48,81 @@
 ;; We will test eval-under-env by calling it directly even though
 ;; "in real life" it would be a helper function of eval-exp.
 (define (eval-under-env e env)
-  (cond [(var? e)           ; var (string)
-         (envlookup env (var-string e))]
+  (cond
+
+    [(var? e)           ; var (string)
+     (envlookup env (var-string e))]
         
-        [(add? e)           ;  add  (e1 e2)
-         (let ([v1 (eval-under-env (add-e1 e) env)]
-               [v2 (eval-under-env (add-e2 e) env)])
-           (if (and (int? v1)
-                    (int? v2))
-               (int (+ (int-num v1) 
-                       (int-num v2)))
-               (error "MUPL addition applied to non-number")))]
+    [(add? e)           ;  add  (e1 e2)
+     (let ([v1 (eval-under-env (add-e1 e) env)]
+           [v2 (eval-under-env (add-e2 e) env)])
+       (if (and (int? v1)
+                (int? v2))
+           (int (+ (int-num v1) 
+                   (int-num v2)))
+           (error "MUPL addition applied to non-number")))]
 
-        [(int? e) e]        ; int (num)
+    [(int? e) e]        ; int (num)
 
-        [(ifgreater? e)     ; ifgreater (e1 e2 e3 e4) 
-         (let ([v1 (eval-under-env (ifgreater-e1 e) env)]
-               [v2 (eval-under-env (ifgreater-e2 e) env)])
-           (if (and (int? v1)
-                    (int? v2))
-               (if (> (int-num v1) (int-num v2))
-                   (eval-under-env (ifgreater-e3 e) env)
-                   (eval-under-env (ifgreater-e4 e) env))
-               (error "MUPL ifgreater applied to non number")))]
+    [(ifgreater? e)     ; ifgreater (e1 e2 e3 e4) 
+     (let ([v1 (eval-under-env (ifgreater-e1 e) env)]
+           [v2 (eval-under-env (ifgreater-e2 e) env)])
+       (if (and (int? v1)
+                (int? v2))
+           (if (> (int-num v1) (int-num v2))
+               (eval-under-env (ifgreater-e3 e) env)
+               (eval-under-env (ifgreater-e4 e) env))
+           (error "MUPL ifgreater applied to non number")))]
 
-        [(fun? e)           ; fun  (nameopt formal body)
-         (closure env e)]
+    [(fun? e)           ; fun  (nameopt formal body)
+     (closure env e)]
         
-        [(call? e)          ; call (funexp actual)
-         (let ([clsr (eval-under-env (call-funexp e) env)])
-           (if (closure? clsr)
-               (let* ([fn (closure-fun clsr)]
-                      [v (eval-under-env (call-actual e) env)]
-                      [env (cons (cons (fun-formal fn) v) (closure-env clsr))])
-                 (if (fun-nameopt fn)
-                     (let ([env (cons (cons (fun-nameopt fn) clsr) env)])
-                       (eval-under-env (fun-body fn) env))
-                     (eval-under-env (fun-body fn) env)))
-               (error "MUPL call given a non-closure")))]
+    [(call? e)          ; call (funexp actual)
+     (let ([c (eval-under-env (call-funexp e) env)])
+       (if (closure? c)
+           (let* ([f (closure-fun c)]
+                  [act (eval-under-env (call-actual e) env)]
+                  [env (cons (cons (fun-formal f) act) (closure-env c))])
+             (if (fun-nameopt f)
+                 (let ([env (cons (cons (fun-nameopt f) c) env)])
+                   (eval-under-env (fun-body f) env))
+                 (eval-under-env (fun-body f) env)))
+           (error "MUPL call given a non-closure")))]
 
-        [(closure? e)       ; closure (env fun)
-         (eval-under-env (closure-fun e) (closure-env e))]
+    [(closure? e)       ; closure (env fun)
+     e]
 
-        [(mlet? e)          ; mlet (var e body)
-         (if (string? (mlet-var e))
-             ;(eval-under-env (mlet-body e) (cons (cons (mlet-var e) (mlet-e e)) env))
-             (eval-under-env (mlet-body e) (append (list (cons (mlet-var e) (mlet-e e))) env))
-             (error "MUPL mlet given a non-string"))]
+    [(mlet? e)          ; mlet (var e body)
+     (eval-under-env (mlet-body e) (cons
+                                    (cons (mlet-var e)
+                                          (eval-under-env (mlet-e e) env))
+                                    env))]
 
-        [(apair? e)         ; apair (e1 e2)
-         (let ([v1 (eval-under-env (apair-e1 e) env)]
-               [v2 (eval-under-env (apair-e2 e) env)])
-           (apair v1 v2))]
+    [(apair? e)         ; apair (e1 e2)
+     (let ([v1 (eval-under-env (apair-e1 e) env)]
+           [v2 (eval-under-env (apair-e2 e) env)])
+       (apair v1 v2))]
 
-        [(fst? e)           ; fst  (e) 
-         (let ([p (eval-under-env (fst-e e) env)])
-           (if (apair? p)
-               (apair-e1 p)
-               (error "MUPL fst given a non-pair")))]
+    [(fst? e)           ; fst  (e) 
+     (let ([p (eval-under-env (fst-e e) env)])
+       (if (apair? p)
+           (apair-e1 p)
+           (error "MUPL fst given a non-pair")))]
 
-        [(snd? e)           ; snd  (e) 
-         (let ([p (eval-under-env (snd-e e) env)])
-           (if (apair? p)
-               (apair-e2 p)
-               (error "MUPL snd given a non-pair")))]
+    [(snd? e)           ; snd  (e) 
+     (let ([p (eval-under-env (snd-e e) env)])
+       (if (apair? p)
+           (apair-e2 p)
+           (error "MUPL snd given a non-pair")))]
 
-        [(aunit? e) e]      ; aunit ()
+    [(aunit? e) e]      ; aunit ()
 
-        [(isaunit? e)       ; isaunit (e)
-         (if (aunit? (eval-under-env (isaunit-e e) env))
-             (int 1)
-             (int 0))]
+    [(isaunit? e)       ; isaunit (e)
+     (if (aunit? (eval-under-env (isaunit-e e) env))
+         (int 1)
+         (int 0))]
 
-        [#t (error (format "bad MUPL expression: ~v" e))]))
+    [#t (error (format "bad MUPL expression: ~v" e))]))
 
 ;; Do NOT change
 (define (eval-exp e)
@@ -131,52 +133,53 @@
 (define (ifaunit e1 e2 e3)
   (ifgreater (isaunit e1) (int 0) e2 e3))
 
-(define (mlet* lstlst e2)
-  (if (empty? lstlst)
+(define (mlet* lst e2)
+  (if (empty? lst)
       e2
-      (mlet (car (car lstlst)) (cdr (car lstlst)) (mlet* (cdr lstlst) e2))))
+      (mlet (car (car lst)) (cdr (car lst)) (mlet* (cdr lst) e2))))
 
 (define (ifeq e1 e2 e3 e4)
-  (let ([_x (eval-exp e1)]
-        [_y (eval-exp e2)])
-    (ifgreater (add
-                (ifgreater _x e2 (int 0) (int 1))
-                (ifgreater _y e1 (int 0) (int 1))) (int 1)                     ;if result of sum of results of ifgreater is > 1 -> both ifgreaters were false -> e1=e2
-                                                   (mlet "_x" e3 (var "_x"))
-                                                   (mlet "_y" e4 (var "_y")))))
+  (mlet "_x" e1
+        (mlet "_y" e2
+              (ifgreater (var "_x") (var "_y")
+                         e4
+                         (ifgreater (var "_y") (var "_x")
+                                    e4
+                                    e3)))))
    
 
-;; Problem 4
+  ;; Problem 4
 
 
-(define mupl-map
-  (fun #f "f" (fun "loop" "lst"
-                   (ifaunit (var "lst")
-                            (aunit)
-                            (apair
-                             (call (var "f") (fst (var "lst")))
-                             (call (var "loop") (snd (var "lst"))))))))
+  (define mupl-map
+    (fun #f "f" (fun "loop" "lst"
+                     (ifaunit (var "lst")
+                              (aunit)
+                              (apair
+                               (call (var "f") (fst (var "lst")))
+                               (call (var "loop") (snd (var "lst"))))))))
                                
 
-(define mupl-mapAddN 
-  (fun #f "i"
-       (fun #f "lst"
-            (call (call mupl-map (fun "add-i" "x" (add (var "x") (var "i"))))
-                  (var "lst")))))
+  (define mupl-mapAddN 
+    (fun #f "i"
+         (fun #f "lst"
+              (call (call mupl-map (fun "add-i" "x" (add (var "x") (var "i"))))
+                    (var "lst")))))
 
-;; Challenge Problem
+  ;; Challenge Problem
 
-(struct fun-challenge (nameopt formal body freevars) #:transparent) ;; a recursive(?) 1-argument function
+  (struct fun-challenge (nameopt formal body freevars) #:transparent) ;; a recursive(?) 1-argument function
 
-;; We will test this function directly, so it must do
-;; as described in the assignment
-(define (compute-free-vars e) "CHANGE")
+  ;; We will test this function directly, so it must do
+  ;; as described in the assignment
+  (define (compute-free-vars e) "CHANGE")
 
-;; Do NOT share code with eval-under-env because that will make
-;; auto-grading and peer assessment more difficult, so
-;; copy most of your interpreter here and make minor changes
-(define (eval-under-env-c e env) "CHANGE")
+  ;; Do NOT share code with eval-under-env because that will make
+  ;; auto-grading and peer assessment more difficult, so
+  ;; copy most of your interpreter here and make minor changes
+  (define (eval-under-env-c e env) "CHANGE")
 
-;; Do NOT change this
-(define (eval-exp-c e)
-  (eval-under-env-c (compute-free-vars e) null))
+  ;; Do NOT change this
+  (define (eval-exp-c e)
+    (eval-under-env-c (compute-free-vars e) null))
+  
