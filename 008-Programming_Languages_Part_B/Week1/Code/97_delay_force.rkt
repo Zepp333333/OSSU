@@ -39,6 +39,6 @@
              (set-mcdr! p ((mcdr p)))
              (mcdr p))))
 
-;(my-mult 0 (let ([x (my-delay (lambda () (slow-add 3 4)))]) (lambda () (my-force x))))
-;(my-mult 1 (let ([x (my-delay (lambda () (slow-add 3 4)))]) (lambda () (my-force x))))
-;(my-mult 2 (let ([x (my-delay (lambda () (slow-add 3 4)))]) (lambda () (my-force x))))
+(my-mult 0 (let ([x (my-delay (lambda () (slow-add 3 4)))]) (lambda () (my-force x))))
+(my-mult 1 (let ([x (my-delay (lambda () (slow-add 3 4)))]) (lambda () (my-force x))))
+(my-mult 2 (let ([x (my-delay (lambda () (slow-add 3 4)))]) (lambda () (my-force x))))
