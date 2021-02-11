@@ -10,8 +10,13 @@ fun f2 x =
   then x
   else x
 
+(* fun f3 x =
+  if x
+  then 42
+  else x *)
+
 fun f4 x = hd []
 
 fun f5 x = ((hd x) + 42)
 
-fun f6 x = (hd (x + 42))
+(* fun f6 x = (hd (x + 42)) *)
