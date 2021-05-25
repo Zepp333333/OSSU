@@ -1,0 +1,61 @@
+/* 
+Simple Arkadoid Game as part of Project 9 NAND2Tetris
+By Sergei Sazonov sspytdev@gmail.com
+*/
+
+/** Represens a block */
+
+class Block{
+    field int xpos, ypos;    // x, y position (16 columns (x), 4 rows (y))
+    field int width, height; // width and height parameters of the block   
+    field int x, y;          // x, y screen coordinates of top left corner of the block
+
+    constructor Block new(int Axpos, int Aypos) {
+        let width = 30;
+        let height = 14;
+        
+        let xpos = Axpos;
+        let ypos = Aypos; 
+
+        let x = xposToX();
+        let y = yposToY();
+        
+        do draw();
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method int xposToX(){
+        return (xpos * 32) + 1;
+    }
+
+    method int yposToY(){
+        return (ypos * 16) + 1;
+    }
+
+    method void draw(){
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        return;
+    }
+
+    method void erase(){
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        return;  
+    }
+
+    method int getBlockX(){
+        return x;
+    }
+
+    method int getBlockY(){
+        return y;
+    }
+    
+
+}

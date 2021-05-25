@@ -1,0 +1,53 @@
+class Tests{
+    field int obj;
+
+    constructor Tests new(){
+        let obj = 1;
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void run(){
+        // testing square
+        var Square square; 
+        var Block block1, block2, curr_block;
+        var int i, j, b, x, y;
+        var Array arr1, arr2;
+
+        let arr1 = Array.new(5);
+        let arr2 = Array.new(5);
+        let x = 0;
+        let y = 20;
+        let j = 0;
+        while (j < 5) {
+            let arr1[j] = Block.new(j, x, y, 0);
+            let arr2[j] = Block.new(j, x, y + 80, 0);
+            let curr_block = arr1[j];
+            do curr_block.draw();
+            let curr_block = arr2[j];
+            do curr_block.draw();
+            let j = j + 1;
+            let x = x + 45;
+        }
+
+        let i = 1;
+        while (true) {
+            let b = 0;
+            while (b < 5){
+                let curr_block = arr1[b];
+                do curr_block.rotate_right();
+                let curr_block = arr2[b];
+                do curr_block.rotate_left();
+                let b = b + 1;
+            }
+            do Sys.wait(400);
+            let i = i + 1;
+
+        }
+        return;
+    }
+}

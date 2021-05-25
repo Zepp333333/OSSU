@@ -1,0 +1,194 @@
+/* 
+Tetris Game as part of Project 9 NAND2Tetris
+By Sergei Sazonov sspytdev@gmail.com
+*/
+
+/** Implements Block figures from squares */
+
+
+class Block {
+    field int type; // type of the block: 0=square, 1=L, 2=T, 3=Z, 4 = I
+    field int x, y; // x, y position of block (top left)
+    field boolean on_floor; // True if blok is on the floor or on other block. False otherwise
+    field Array block; // array of Squares representing Block
+    field int rotation; // represetn a rotation 0 : 3
+    static int size; // size of the block
+
+    constructor Block new(int block_type, int Ax, int Ay, int Arotation) {
+        let size = 10;
+        let type = block_type;
+        let x = Ax;
+        let y = Ay; 
+        let rotation = Arotation;
+        let on_floor = false;
+
+        let block = Array.new(4);
+        do set_rotation(rotation);
+      
+        return this;
+    }
+
+    /** Disposes this Block. */
+    method void dispose() {
+        var Square curr_square;
+        var int i;
+        let i = 0;
+        while (i < 4) {
+            let curr_square = block[i];
+            do curr_square.dispose();
+            let i = i + 1;
+        }
+        do block.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    // Draw block
+    method void draw() {
+        var Square curr_square;
+        var int i;
+        let i = 0;
+        while (i < 4) {
+            let curr_square = block[i];
+            do curr_square.draw();
+            let i = i + 1;
+        }
+        return;
+    }
+
+    // Erase block
+    method void erase() {
+        var Square curr_square;
+        var int i;
+        let i = 0;
+        while (i < 4) {
+            let curr_square = block[i];
+            do curr_square.erase();
+            let i = i + 1;
+        }
+        return;
+    }
+
+    method void rotate(int r_index) {
+        do erase();
+        do set_rotation(r_index);
+        do draw();
+        return;
+    }
+
+    method void rotate_left(){
+        if (rotation = 0) {let rotation = 3;} else {let rotation = rotation - 1;}
+        do rotate(rotation);
+        return;
+    }
+
+    method void rotate_right(){
+        if (rotation = 3) {let rotation = 0;} else {let rotation = rotation + 1;}
+        do rotate(rotation);
+        return;
+    }
+
+    method void drop(){
+        while (~on_floor) {
+            do Sys.wait(10);
+        }
+        return;
+    }
+    
+    method void set_on_floor(){
+        let on_floor = true;
+        return;
+    }
+
+    method void set_rotation(int r_index){
+        if (type = 0){
+            let block[0] = Square.new(x, y, size);
+            let block[1] = Square.new(x + size, y, size);
+            let block[2] = Square.new(x, y + size, size);
+            let block[3] = Square.new(x + size, y + size, size);
+        }
+        if (type = 1){
+            if (r_index = 0) {
+                let block[0] = Square.new(x, y, size);
+                let block[1] = Square.new(x, y + size, size);
+                let block[2] = Square.new(x, y + size + size, size);
+                let block[3] = Square.new(x + size, y + size + size, size);
+            }
+            if (r_index = 1) {
+                let block[0] = Square.new(x, y + size, size);
+                let block[1] = Square.new(x + size, y + size, size);
+                let block[2] = Square.new(x + size + size, y + size, size);
+                let block[3] = Square.new(x + size  + size, y, size);
+            }
+            if (r_index = 2) {
+                let block[0] = Square.new(x, y, size);
+                let block[1] = Square.new(x + size, y, size);
+                let block[2] = Square.new(x + size, y + size, size);
+                let block[3] = Square.new(x + size, y + size + size, size);
+            }
+            if (r_index = 3) {
+                let block[0] = Square.new(x, y, size);
+                let block[1] = Square.new(x, y + size, size);
+                let block[2] = Square.new(x + size, y, size);
+                let block[3] = Square.new(x + size + size, y, size);
+            }
+        }
+        if (type = 2) {     // T
+            if (r_index = 0) {
+                let block[0] = Square.new(x, y, size);
+                let block[1] = Square.new(x + size, y, size);
+                let block[2] = Square.new(x + size + size, y, size);
+                let block[3] = Square.new(x + size, y + size, size);
+            }
+            if (r_index = 1) {
+                let block[0] = Square.new(x, y, size);
+                let block[1] = Square.new(x, y + size, size);
+                let block[2] = Square.new(x, y + size + size, size);
+                let block[3] = Square.new(x + size, y + size, size);
+            }
+            if (r_index = 2) {
+                let block[0] = Square.new(x, y + size, size);
+                let block[1] = Square.new(x + size, y + size, size);
+                let block[2] = Square.new(x + size + size, y + size, size);
+                let block[3] = Square.new(x + size, y, size);
+            }
+            if (r_index = 3) {
+                let block[0] = Square.new(x + size, y, size);
+                let block[1] = Square.new(x + size, y + size, size);
+                let block[2] = Square.new(x + size ,y + size + size, size);
+                let block[3] = Square.new(x, y + size, size);
+            }
+        }
+        if (type = 3) {     // Z
+            if ((r_index = 0) | (r_index = 2)) {
+                let block[0] = Square.new(x, y, size);
+                let block[1] = Square.new(x + size, y, size);
+                let block[2] = Square.new(x + size, y + size, size);
+                let block[3] = Square.new(x + size + size, y + size, size);
+            }
+            if ((r_index = 1) | (r_index = 3)) {
+                let block[0] = Square.new(x + size, y, size);
+                let block[1] = Square.new(x, y + size, size);
+                let block[2] = Square.new(x + size, y + size, size);
+                let block[3] = Square.new(x, y + size + size, size);
+            }
+        }
+        if (type = 4) {     // I
+            if ((r_index = 0) | (r_index = 2)) {
+                let block[0] = Square.new(x + size, y, size);
+                let block[1] = Square.new(x + size, y + size, size);
+                let block[2] = Square.new(x + size, y + size + size, size);
+                let block[3] = Square.new(x + size, y + size + size + size, size);
+            }
+            if ((r_index = 1) | (r_index = 3)) {
+                let block[0] = Square.new(x, y + size, size);
+                let block[1] = Square.new(x + size, y + size, size);
+                let block[2] = Square.new(x + size + size, y + size, size);
+                let block[3] = Square.new(x + size + size + size, y + size, size); 
+            }
+        }
+        return;
+    }
+    
+
+}

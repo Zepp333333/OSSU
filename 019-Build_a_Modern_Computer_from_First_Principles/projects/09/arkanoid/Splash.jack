@@ -1,0 +1,40 @@
+/* 
+Simple Arkadoid Game as part of Project 9 NAND2Tetris
+By Sergei Sazonov sspytdev@gmail.com
+*/
+
+/** Simplse splash screen for Arkanoid game */
+
+class Splash{
+    field int empty;                // Class has to allocate memory
+    constructor Splash new(){
+        let empty = 0;
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void draw() {
+        do Screen.clearScreen();
+        do Output.moveCursor(7,10);
+        do Output.printString("Hi, this is simple Arkadoid game!!!");
+        do Output.moveCursor(9,10);
+        do Output.printString("Controll the bat with left|right arrows");
+        do Output.moveCursor(11,10);
+        do Output.printString("Up|Down arrows stop the bat in current position");
+        do Output.moveCursor(1,10);
+        do Output.printString("Press N for New game! Press Q to quit");
+        return;
+    }
+
+
+    method void clear (){
+        do Screen.clearScreen();
+        return;
+    }
+
+
+}

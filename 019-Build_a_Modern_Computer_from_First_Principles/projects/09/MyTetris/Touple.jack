@@ -1,0 +1,18 @@
+class Touple {
+    field Array touple;
+    constructor Touple new(int Ax, int Ay){
+        let touple = Array.new(2);
+        let touple[0] = Ax;
+        let touple[1] = Ay;
+        return this;
+    } 
+
+    method int get_x() {
+        return touple[0];
+    }
+
+    method int get_y() {
+        return touple[1];
+    }
+
+}

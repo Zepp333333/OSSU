@@ -1,0 +1,43 @@
+/* 
+Simple Arkadoid Game as part of Project 9 NAND2Tetris
+By Sergei Sazonov sspytdev@gmail.com
+*/
+
+/** Initializes a new Tetris game and starts running it. */
+class Main{
+    
+    function void main() {
+        var boolean exit;
+        var char key;
+        var Splash splash;
+        var ArkGame game;
+        let exit = false;
+        
+
+        while (~exit) {
+            let exit = false;
+            let splash = Splash.new();
+            do splash.draw();
+            // waits for a key to be pressed
+            while ((key = 0) & (~exit)) {
+                let key = Keyboard.keyPressed();
+            }
+
+            if (key = 81)  { let exit = true;   }   // q = quit
+            if (key = 78)  {                        // n = new game
+                do splash.clear();
+                do splash.dispose();
+                let game = ArkGame.new();
+                do game.run();
+                do game.dispose();
+
+                // waits for a key to be released
+                while (~(key = 0)) { let key = Keyboard.keyPressed(); }
+             }  
+        } // outer while
+
+       
+        return;
+    }
+
+}

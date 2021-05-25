@@ -1,0 +1,78 @@
+/* 
+Simple Arkadoid Game as part of Project 9 NAND2Tetris
+By Sergei Sazonov sspytdev@gmail.com
+*/
+
+/** represents a Bat  */
+
+class Bat{ 
+    field int x, y, width, height; // screen coordinates and size in pixels of the Bat
+    
+    constructor Bat new(int Ax, int Ay, int Awidth, int Aheight) {
+        let x = Ax;
+        let y = Ay;
+        let width = Awidth;
+        let height = Aheight;
+        do draw();
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        return;
+    }
+
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        return;
+    }
+
+    method void moveLeft() {
+        if (x > 1) {
+            do erase();
+            let x = x - 2;
+            do draw();
+        }
+        return;
+    }
+
+    method void moveRight() {
+        if ((x + width) < 510) {
+            do erase();
+            let x = x + 2;
+            do draw();
+        }
+        return;
+    }
+
+    // move the bat to x coordinate. Needed for auto-play so that the bat mirrors the ball moves. 
+    method void moveTo(int bx) {
+        if ((bx - 20) < 0) {let bx = 20;}
+        if ((bx + width) > 511) {let bx = 511 - 20;}
+        do erase();
+        let x = bx - 20;
+        do draw();
+        return; 
+    }
+
+    // 3 getters returding coordinates of bat top, left and right sides.
+    method int getBatTop(){
+        return y;
+    }
+
+    method int getBatLeft(){
+        return x;
+    }
+
+    method int getBatRight(){
+        return x + width;
+    }
+
+}

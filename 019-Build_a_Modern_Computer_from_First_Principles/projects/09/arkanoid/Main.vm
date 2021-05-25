@@ -1,0 +1,74 @@
+function Main.main 4
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+not
+not
+if-goto WHILE_END0
+push constant 0
+pop local 0
+call Splash.new 0
+pop local 2
+push local 2
+call Splash.draw 1
+pop temp 0
+label WHILE_EXP1
+push local 1
+push constant 0
+eq
+push local 0
+not
+and
+not
+if-goto WHILE_END1
+call Keyboard.keyPressed 0
+pop local 1
+goto WHILE_EXP1
+label WHILE_END1
+push local 1
+push constant 81
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+not
+pop local 0
+label IF_FALSE0
+push local 1
+push constant 78
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push local 2
+call Splash.clear 1
+pop temp 0
+push local 2
+call Splash.dispose 1
+pop temp 0
+call ArkGame.new 0
+pop local 3
+push local 3
+call ArkGame.run 1
+pop temp 0
+push local 3
+call ArkGame.dispose 1
+pop temp 0
+label WHILE_EXP2
+push local 1
+push constant 0
+eq
+not
+not
+if-goto WHILE_END2
+call Keyboard.keyPressed 0
+pop local 1
+goto WHILE_EXP2
+label WHILE_END2
+label IF_FALSE1
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return

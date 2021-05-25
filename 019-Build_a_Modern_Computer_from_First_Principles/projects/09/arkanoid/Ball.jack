@@ -1,0 +1,174 @@
+/* 
+Simple Arkadoid Game as part of Project 9 NAND2Tetris
+By Sergei Sazonov sspytdev@gmail.com
+*/
+
+/** represents a Ball */
+
+class Ball{
+    field int x, y, rad, xdir, ydir;   // screen coordinates and radius in pixels of the Ball
+                                       // Ball's Direction as x and y components
+    field int blockInTouch; // index of the block being touched (100 = none)
+    field int bounceDir;    //bounce direction 0 = none, 1 = x, 2 = y, 3 = xy
+
+    constructor Ball new(int Ax, int Ay, int Ar, int Axdir, int Aydir) {
+        let x = Ax;
+        let y = Ay;
+        let rad = Ar;
+        let xdir = Axdir;
+        let ydir = Aydir;
+        let blockInTouch = 100;
+        let bounceDir = 0;
+        do draw();
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method int getX(){
+        return x;
+    }
+
+    method void setDir(int dx, int dy){
+        let xdir = xdir + dx;
+        let ydir = ydir + dx;
+        return;
+    }
+
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawCircle(x, y, rad);
+        return;
+    }
+
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawCircle(x, y, rad);
+        return;
+    }
+
+    method void setBounce(int d){
+        let bounceDir = d;
+        return;
+    }
+
+    // sets ball direction according to bounceDir field (0 = none, 1 = x, 2 = y, 3 = xy)
+    method void bounce() {
+        if (bounceDir = 1){
+            let xdir = -xdir;
+        }
+        if (bounceDir = 2){
+            let ydir = -ydir;
+        }
+        if (bounceDir = 3){
+            let ydir = -ydir;
+            let xdir = -xdir;
+        }
+        let bounceDir = 0;
+        return;
+    }
+
+    method void move(){
+        do erase();
+        let x = x + xdir;
+        let y = y + ydir;
+        do draw();
+        return;
+    }
+
+    method int getBlockInTouch(){
+        return blockInTouch;
+    }
+
+    // performs check wether the ball is touching other object
+    // counts number of touches in case corner (i.e. bat and the wall)
+    method int isTouching(int batTop, int batLeft, int batRight, Array blocks){
+        var int result, touches;
+        let result = 0;
+        let touches = 0;
+        if (isTouchingBlocks(blocks))                 {let result = 1;let touches = touches + 1;}    // 1
+        if (isTouchingTop())                          {let result = 2;let touches = touches + 1;}    // 2
+        if (isTouchingWall())                         {let result = 3;let touches = touches + 1;}    // 3
+        if (isTouchingBat(batTop, batLeft, batRight)) {let result = 4;let touches = touches + 1;}    // 4 
+        if (isTouchingBottom())                       {let result = 5;let touches = touches + 1;}    // 5
+        if (touches > 1) {return 6;}  // corner
+        return result;
+    }
+
+    method boolean isTouchingWall() {
+        if ((x = 4) | (x = 508)) {return true;}
+        return false;
+    }    
+
+    method boolean isTouchingTop() {
+        if (y = 4) {return true;}
+        return false;
+    }    
+
+    method boolean isTouchingBottom() {
+        if (y = 252) {return true;}
+        return false;
+    }    
+
+    method boolean isTouchingBat(int batTop, int batLeft, int batRight) {
+        var int ballBottom, ballLeft, ballRight;
+        if ((y = (batTop - 4)) &      
+            ((x  > batLeft) & (x < batRight))){
+                return true;
+        }
+        return false;
+    }    
+
+    // goes throug every block in blocks to check if there's a touch. 
+    // Could and shoudl be rewritten eithes (a) by slicing game area into smaller chunks so that 
+    // we check only limiten numnber of blocks each time (i.e. don't check if ball is below 
+    // the bottom row of blocks. Verticall slices to help only check small fration of blocks near 
+    // the ball). Or (b) - create a datastructire representing the border line of remaining 
+    // blocks and check touches with this line.
+    method boolean isTouchingBlocks(Array blocks) {
+        var int i;
+        let i = 0;
+        
+        while (i < 64) {
+            if (~(blocks[i] = null)) {
+                if (checkSingeBlockTouch(blocks[i]) = true) {
+                    let blockInTouch = i;           // save which block did we touch
+                    return true;
+                }
+            }
+            let i = i + 1;
+        }
+        return false;
+    }    
+
+    // checks if ball is touching block by comparing coordinates of block borders and coordinates 
+    // of the ball.
+    method boolean checkSingeBlockTouch(Block block) {
+        var int bl, br, bt, bb;  // block left, right, top, bottom
+        let bl = block.getBlockX();
+        let bt = block.getBlockY();
+        let br = bl + 30;               // euh, consider removing hardcode here
+        let bb = bt + 14;               // euh, consider removing hardcode here
+
+        if ((x > (bl - rad)) & (x < (br + rad)) & (y = (bt - rad))) {   // touch top of the block
+            let bounceDir = 2;  // y-bounce
+            return true;
+        }
+        if ((x > (bl - rad)) & (x < (br + rad)) & (y = (bb + rad))) {   // touch bottom of the block
+            let bounceDir = 2;  // y-bounce
+            return true;
+        }
+        if ((x = (bl - rad)) & (y < (bb + rad)) & (y > (bt - rad))) {   // touch left of the block
+            let bounceDir = 1;  // x-bounce
+            return true;
+        }
+        if ((x = (br + rad)) & (y < (bb + rad)) & (y > (bt - rad))) {   // touch right of the block
+            let bounceDir = 1;  // x-bounce
+            return true;
+        }
+        return false;
+    }
+}

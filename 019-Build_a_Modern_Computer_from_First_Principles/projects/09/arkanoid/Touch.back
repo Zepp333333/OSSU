@@ -1,0 +1,71 @@
+
+
+class Touch{
+    field Ball ball;
+    field Bat bat;
+
+    constructor Touch new(Ball Aball, Bat Abat){
+        let ball = Aball;
+        let bat = Abat;
+        return this;
+    }
+
+    method void dispose(){
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method int isTouching(){
+        if (isTouchingBlock())    {return 1;} 
+        if (isTouchingTop())      {return 2;}
+        if (isTouchingWall())     {return 3;}
+        if (isTouchingBat())      {return 4;} 
+        if (isTouchingBottom())   {return 5;}
+        return 0;
+    }
+
+    method boolean isTouchingWall() {
+        var int left, right;
+        let left = ball.getLeft();
+        let right = ball.getRight();
+        if ((left < 3) | (right > 509)) {return true;}
+        return false;
+    }    
+
+    method boolean isTouchingBat() {
+        var Array batTopSide;
+        var int ballBottom, ballLeft, ballRight;
+        let batTopSide = bat.getTop();         // [0] = top, [1] = left, [2] = right sides of the bat
+        let ballBottom = ball.getBottom();
+        let ballLeft = ball.getLeft();
+        let ballRight = ball.getRight();
+        
+        if ((ballBottom > (batTopSide[0] + 2)) &      
+            ((ballRight > (batTopSide[1] - 1)) | (ballLeft > (batTopSide[2] + 1)))){
+                 // if bottom of the ball >= top of the Bat
+                // if right side of Ball >= left side of bat or vice versa
+                return true;
+            
+        }
+
+        return false;
+    }    
+
+    method boolean isTouchingBlock() {
+        return false;
+    }    
+
+    method boolean isTouchingTop() {
+        var int top;
+        let top = ball.getTop();
+        if (top < 3) {return true;}
+        return false;
+    }    
+
+    method boolean isTouchingBottom() {
+        var int bottom;
+        let bottom = ball.getBottom();
+        if (bottom > 253) {return true;}
+        return false;
+    }    
+}

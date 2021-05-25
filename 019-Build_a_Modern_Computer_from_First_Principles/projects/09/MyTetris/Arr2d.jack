@@ -1,0 +1,75 @@
+class Arr2d {
+    field Array x, y;
+    field int x_size, y_size;
+
+    constructor Arr2d new(int Ax_size, int Ay_size) {
+        let x_size = Ax_size;
+        let y_size = Ay_size;
+        let x = Array.new(x_size);
+        do init_arr2d();
+        return this;
+    }
+
+    method void init_arr2d() {
+        var int i;
+        let i = 0;
+        while (i < x_size) {
+            let y = Array.new(y_size);
+            let x[i] = y;
+            let i = i + 1;
+        }
+        return;
+    }
+
+    method void set_col(int col, String s) {
+        /**
+        Sets single column of arr2d starting from bottom
+        params:
+            col: numerb of columt to fill-in starting left
+            String: string of 0's and 1's where 1 represents a block
+            of a piece. Starts from bottom up.
+        */
+
+        var int i, t;
+        var String c; 
+        var Array column;
+
+        if (~(s.length() = y_size)) {
+            do Sys.halt();
+        }
+
+        let column = x[col];
+        let i = 0;
+        
+        while (i < y_size){
+            let c = String.new(1);
+            let c = c.appendChar(s.charAt(i));
+            let t = c.intValue();
+            let column[(y_size - 1 - i)] = t;
+            do c.dispose();
+            let i = i + 1;
+        }
+        
+        return;
+    }
+
+    method void print() {
+        var int i, j;
+        var Array column;
+        let i = 0;
+
+        while (i < y_size) {    // march through rows
+            let j = 0;
+            while (j < x_size) {    // march through columns
+                let column = x[j];
+                do Output.printInt(column[i]);
+                let j = j + 1;
+            }
+            do Output.println();
+            let i = i + 1;
+        }
+        return;
+
+    }
+
+}

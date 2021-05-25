@@ -1,0 +1,179 @@
+
+/* 
+Simple Arkadoid Game as part of Project 9 NAND2Tetris
+By Sergei Sazonov sspytdev@gmail.com
+*/
+
+/** Main class for Arkanoid
+Initializes game objects, and runs the game. Perform carefull clean-up of blocks 
+array on .dispose() call.
+
+*/
+
+class ArkGame{
+    field Bat bat;          // the bat
+    field Ball ball;        // the ball
+    field int batDir;       // the direction of the bat movement:
+                            // 0=none, 1=left, 2=right
+    field Array blocks;     // array of blocks
+    field boolean exit;     
+
+    field int score;        // game score 
+    
+    field int auto;         // Default 0. If set to 1 - computer plays perfectly instead human 
+
+    constructor ArkGame new () {
+        
+        let auto = 0;    // Default 0. If set to 1 - computer plays perfectly instead human  
+
+        let exit = false;
+        let score = 0;
+        let batDir = 0;  // bat don't move at game start
+        let bat = Bat.new(256, 245, 40, 5);         // x, y, width, height
+        let ball = Ball.new(200, 128, 3, 2, 1);     // x, y, radius, Direction:x,y
+
+        let blocks = Array.new(64);         // array of blocks to play against
+        do populateBlocks();                // Populate array with Block objects
+        return this;
+    }
+
+    method void dispose() {
+        var int i;
+        var Block bl;
+        let i = 0;
+
+        do bat.dispose();
+        do ball.dispose();
+        while (i < 64) {                    // dispose all remaining Block objects in Array
+            let bl = blocks[i];
+            if (~(bl = null)) {
+                do bl.dispose();
+            }
+            let i = i + 1;
+        }
+        do blocks.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    // Populate array with 64 Block objects at correct positions:
+    //      j,k represent column/row of the block
+    method void populateBlocks(){
+        var int i, j, k;
+        let i = 0;
+        let j = 0;
+        let k = 0;
+        while (i < 64) {                        // create 64 blocks 
+            let blocks[i] = Block.new(j,k);
+            let j = j + 1;
+            if (j = 16){                        // 16 in row
+                let j = 0;
+                let k = k + 1;                  // 4 columns
+            }
+            let i = i + 1;
+        }
+        return;
+    }
+
+    // Moves the bat into direction
+    // If auto set to 1 - plays automatically instead of human
+    method void moveBat() {
+        if (auto = 1) {do bat.moveTo(ball.getX());}     // if we want computer to play
+        else {
+            if (batDir = 1) {do bat.moveLeft();}
+            if (batDir = 2) {do bat.moveRight();}
+            do Sys.wait(4);
+        }
+        return;
+    }
+
+    // Moves the ball
+    // performs a check wether the ball is touching wall or bar or block or bottom before
+    // actual move
+    method void moveBall() {
+        var int touching, batTop, batLeft, batRight;
+        let touching = 0;
+        let touching = ball.isTouching(bat.getBatTop(), bat.getBatLeft(), bat.getBatRight(), blocks);
+        if (touching = 5) {do gameLoss(); return;}            // bottom  
+        if (touching = 1) {do removeBlock();     }            // block
+        if (touching = 2) {do ball.setBounce(2); }            // top
+        if (touching = 3) {do ball.setBounce(1); }            // wall
+        if (touching = 4) {do ball.setBounce(2); }            // bat
+        if (touching = 6) {do ball.setBounce(3);  }           // corner (i.e. wall and bat)
+        do ball.bounce();
+        do ball.move();
+        do Sys.wait(0);
+        return;
+    }
+
+    // Removes the block when hit by a ball and updates the game score
+    method void removeBlock(){
+        var Block curBlock;
+        var int curBlockIndex;
+        let curBlockIndex = ball.getBlockInTouch();
+        let curBlock = blocks[curBlockIndex];
+        do curBlock.erase();
+        do curBlock.dispose();
+        let blocks[curBlockIndex] = null;
+        let score = score + 1;
+        if (score = 64) {do gameWin(); return;}
+        do Output.moveCursor(7,0);
+        do Output.printString("Score: ");
+        do Output.moveCursor(7,8);
+        do Output.printInt(score);
+        return;
+    }
+
+    // on Game loss prints Sorry statement and sets exit=true 
+    method void gameLoss(){
+        do Output.moveCursor(15,20);
+	    do Output.printString("Sorry, Game over");
+        do Sys.wait(2000);
+        let exit = true;
+        return;
+    }
+
+    // on Game win prints Congrats statement and sets exit=true 
+    method void gameWin(){
+        do Output.moveCursor(15,20);
+	    do Output.printString("Hey, You won!!!");
+        do Sys.wait(2000);
+        let exit = true;
+        return;
+    }
+
+    // Runs the game
+    method void run() {
+        
+        var char key; // currently pressed key
+        // Print the initial score (0)
+        do Output.moveCursor(7,0);
+        do Output.printString("Score: ");
+        do Output.moveCursor(7,8);
+        do Output.printInt(score);
+        
+        while (~exit) {
+            // waits for a key to be pressed
+            while ((key = 0) & (~exit)) {
+                let key = Keyboard.keyPressed();
+                do moveBall();
+                do moveBat();
+            }
+
+            if (key = 81)  { let exit = true;}   // q = quit
+            if (key = 130) { let batDir = 1; }   // left
+            if (key = 132) { let batDir = 2; }   // right  
+            if (key = 131) { let batDir = 0; }   // up = stop moving  
+            if (key = 133) { let batDir = 0; }   // down = stop moving  
+
+           // waits for the key to be released
+        while ((~(key = 0)) & (~exit)) {
+            let key = Keyboard.keyPressed();
+            do moveBall();
+            do moveBat();
+            
+            }
+        } // outer while
+        return;
+    } // method run
+} // class

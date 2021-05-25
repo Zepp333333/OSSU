@@ -1,0 +1,22 @@
+class Piece {
+    field Array grid;
+    field int type;     // type of the piece: 0=O, 1=L, 2=J, 3=T, 4=S, 5=Z, 6=I
+    field in current_block;
+    // (0, 0), (1, 0), (1, 1), (2, 1)
+    constructor Piece new(int Atype) {
+        let type = Atype;
+        let grid = Array.new(4);
+        return this;
+    }
+
+    method void add_block(x, y){
+        var t = Touple.new(x, y)
+        let grid[curr_block] = t;
+        let curr_block = curr_block + 1;
+        return;
+    }
+        
+     
+    
+
+}
