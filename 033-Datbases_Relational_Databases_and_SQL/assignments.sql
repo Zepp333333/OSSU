@@ -455,6 +455,103 @@ from (select  name, grade, count(l.id2) as lks
 where s.lks > 1
 
 /*
+SQL Social-Network Query Exercises Extras
+Q1
+0 points (ungraded)
+For every situation where student A likes student B, but student B likes a different student C, return the names and grades of A, B, and C.
+
+*/
+
+select h.name, h.grade, h2.name, h2.grade, h3.name, h3.grade
+from Likes l
+join likes l2 on l.id2 = l2.id1
+join Highschooler h on l.id1 = h.id
+join Highschooler h2 on l.id2 = h2.id
+join Highschooler h3 on l2.id2 = h3.id
+where l2.id2 <> l.id1
+
+/*
+Q2
+0 points (ungraded)
+Find those students for whom all of their friends are in different grades from themselves. Return the students' names and grades.
+
+*/
+
+select  distinct h1.name, h1.grade
+from Friend f1
+join Friend f2 on f1.id1 = f2.id1
+join Highschooler h1 on f1.id1 = h1.id
+join Highschooler h2 on f1.id2 = h2.id
+where h1.grade <> h2.grade
+EXCEPT
+select DISTINCT h1.name, h1.grade
+from Friend f1
+join Friend f2 on f1.id1 = f2.id1
+join Highschooler h1 on f1.id1 = h1.id
+join Highschooler h2 on f1.id2 = h2.id
+where h1.grade = h2.grade
+
+/*
+Q3
+0 points (ungraded)
+What is the average number of friends per student? (Your result should be just one number.)
+*/
+
+select avg(cnt)
+from 
+(select distinct *, count(f1.id2) as cnt
+from friend f1
+group by f1.id1) as s
+
+
+/*
+Q4
+0 points (ungraded)
+Find the number of students who are either friends with Cassandra or are friends of friends of Cassandra. Do not count Cassandra, even though technically she is a friend of a friend.
+*/
+
+select count(distinct f1.id2) + count(distinct f2.id2)
+from Friend f1 
+join Friend f2 on f2.id1 = f1.id2
+where f1.id1 = 
+	(select distinct h1.id 
+	from Friend f1
+	join Highschooler h1 on f1.id1 = h1.id
+	where h1.name = 'Cassandra')
+	and 
+	f2.id2 <>
+	(select distinct h1.id 
+	from Friend f1
+	join Highschooler h1 on f1.id1 = h1.id
+	where h1.name = 'Cassandra')
+
+/*
+Q5
+0 points (ungraded)
+Find the name and grade of the student(s) with the greatest number of friends.
+*/
+
+select name, grade
+from (select h1.name, h1.grade, count(f1.id2) as cnt
+			from friend f1
+			join Highschooler h1 on f1.id1 = h1.id
+			group by f1.id1) as s
+where cnt = (select max(cnt) 
+						from (select h1.name, h1.grade, count(f1.id2) as cnt
+			from friend f1
+			join Highschooler h1 on f1.id1 = h1.id
+			group by f1.id1) as s)
+
+
+/*
+
+*/
+
+/*
+
+*/
+
+/*
 
 */
 
@@ -469,6 +566,15 @@ where s.lks > 1
 /*
 
 */
+
+/*
+
+*/
+
+/*
+
+*/
+
 
 
 
