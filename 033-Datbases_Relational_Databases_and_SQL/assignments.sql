@@ -544,29 +544,92 @@ where cnt = (select max(cnt)
 
 
 /*
+SQL Movie-Rating Modification Exercises
 
+Q1
+0/1 points (graded)
+Add the reviewer Roger Ebert to your database, with an rID of 209.
 */
+
+insert into Reviewer VALUES (209, 'Roger Ebert')
+
+
+/*
+Q2
+0/1 points (graded)
+For all movies that have an average rating of 4 stars or higher, add 25 to the release year. (Update the existing tuples; don't insert new tuples.)
+*/
+
+UPDATE Movie
+set year = year + 25
+where mid in
+(select mid
+		from rating 
+		group by mid
+		having  avg(stars)  >= 4)
+
+/*
+Q3
+0/1 points (graded)
+Remove all ratings where the movie's year is before 1970 or after 2000, and the rating is fewer than 4 stars.
+*/
+
+delete from rating 
+where mid in 
+(select mid
+ from Movie m 
+where m.year < 1970 or m.year > 2000) and stars < 4
 
 /*
 
+SQL Social-Network Modification Exercises
+
+Q1
+0/1 points (graded)
+It's time for the seniors to graduate. Remove all 12th graders from Highschooler.
 */
+
+DELETE from Highschooler
+where id in 
+(select id
+from Highschooler h
+where h.grade = 12)
 
 /*
+Q2
+0/1 points (graded)
+If two students A and B are friends, and A likes B but not vice-versa, remove the Likes tuple.
 
 */
-
+delete from Likes
+where id1 in (
+	select id1
+	from (
+		select f.id1, f.id2
+		from Friend f
+		join Likes l on f.id1 = l.id1
+		where f.id2 = l.id2 
+	EXCEPT
+		select l1.id1, l1.id2
+		from likes l1
+		join likes l2 on l1.id1 = l2.id2
+		where l1.id1 = l2.id2 and l1.id2 = l2.id1
+	)
+)
 /*
+Q3
+0/1 points (graded)
+For all cases where A is friends with B, and B is friends with C, add a new friendship for the pair A and C. Do not add duplicate friendships, friendships that already exist, or friendships with oneself. (This one is a bit challenging; congratulations if you get it right.)
+
 
 */
-
-/*
-
-*/
-
-/*
-
-*/
-
+insert into Friend
+select  f1.id1, f2.id2
+from Friend f1
+join Friend f2
+on f1.id2 = f2.ID1 and f1.id1 <> f2.id2
+except 
+select * from Friend
 /*
 
 */
